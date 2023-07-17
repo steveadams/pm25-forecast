@@ -59,12 +59,15 @@ def create_app(forecast_instance, store_instance):
 
 if __name__ == "__main__":
     encryption_key_string = os.environ.get("ENCRYPTION_KEY")
-    key = encryption_key_string.encode() if encryption_key_string else None
-
-    if not key:
+    if not encryption_key_string:
         raise ValueError("ENCRYPTION_KEY environment variable must be set")
+    key = encryption_key_string.encode()
 
-    store = Store(host="localhost", port=6379, db=0, encryption_key=key)
+    store_url = os.getenv("STORE_URL")
+    if not store_url:
+        raise ValueError("STORE_URL environment variable must be set")
+    store = Store(store_url, encryption_key=key)
+
     forecast_instance = Forecast(load_data_from_file("./data/dispersion.nc"))
 
     app = create_app(forecast_instance, store)

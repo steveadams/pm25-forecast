@@ -7,7 +7,7 @@ class TestStore(unittest.TestCase):
     @patch("redis.Redis", return_value=MagicMock())
     def setUp(self, mock_redis):
         self.store = Store(
-            "localhost", 6379, 0, b"ek18EeK9CziCvBFRKtRO4sS6g-GcOYbXsLxzCMa1btk="
+            "redis://redis:6379/0", b"ek18EeK9CziCvBFRKtRO4sS6g-GcOYbXsLxzCMa1btk="
         )
         self.mock_redis = mock_redis.return_value
 

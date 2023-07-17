@@ -3,8 +3,8 @@ import redis
 
 
 class Store:
-    def __init__(self, host, port, db, encryption_key):
-        self.redis = redis.Redis(host=host, port=port, db=db)
+    def __init__(self, url, encryption_key):
+        self.redis = redis.from_url(url)
         self.cipher = Fernet(encryption_key)
 
     def is_connected(self):
