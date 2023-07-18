@@ -1,15 +1,10 @@
-# fly.toml app configuration file generated for pm25-api on 2023-07-18T09:42:13-07:00
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
-
 app = "pm25-api"
-primary_region = "sea"
+primary_region = "yyz"
 
 [http_service]
   internal_port = 5000
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ["app"]
