@@ -1,6 +1,8 @@
 import numpy as np
 from netCDF4 import Dataset  # type: ignore
 
+from helpers import convert_to_iso
+
 
 def load_data_from_file(file_path):
     def loader():
@@ -30,6 +32,12 @@ class Forecast:
         # Create arrays
         self.lon = np.linspace(xorig, xend, ncols)
         self.lat = np.linspace(yorig, yend, nrows)
+
+    def last_updated(self):
+        return convert_to_iso(int(self.data.WDATE), int(self.data.WTIME))
+
+    def report_period_start(self):
+        return convert_to_iso(int(self.data.SDATE), int(self.data.STIME))
 
     def close_data(self):
         self.data.close()

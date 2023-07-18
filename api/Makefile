@@ -1,15 +1,10 @@
-.PHONY: env run test
-
-all: env run
-
-env:
-	@source ./env/bin/activate
+.PHONY: run test
 
 run:
-	@python3 server.py
+	. ./env/bin/activate && flask run --debugger
 
 test:
-	@python3 -m unittest discover -s . -p 'test_*.py'
+	./env/bin/python -m unittest discover -s . -p '*_test.py'
 
 deps:
-	@pip freeze > requirements.txt
+	./env/bin/pip freeze > requirements.txt
