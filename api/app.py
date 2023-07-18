@@ -1,12 +1,16 @@
 from dotenv import load_dotenv
 from flask import current_app, Flask, jsonify, request
 from mailchimp_marketing.api_client import ApiClientError
+from forecasting import fetch_forecast_data
 
 from config import load_default_config
 
 
 def create_app(config_object=None):
     load_dotenv()
+
+    # Import forecast data from the web
+    fetch_forecast_data()
 
     app = Flask(__name__)
     if config_object is not None:
@@ -97,3 +101,9 @@ def create_app(config_object=None):
             return jsonify(error)
 
     return app
+
+
+# Create main entry
+if __name__ == "__main__":
+    app = create_app(load_default_config())
+    app.run()

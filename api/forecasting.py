@@ -1,7 +1,23 @@
 import numpy as np
 from netCDF4 import Dataset  # type: ignore
+import requests
 
 from helpers import convert_to_iso
+
+
+def fetch_forecast_data():
+    print("Fetching forecast data")
+
+    url = "https://firesmoke.ca/forecasts/current/dispersion.nc"
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        raise ValueError("Failed to fetch forecast data")
+
+    filename = f"./data/dispersion.nc"
+
+    with open(filename, "wb") as f:
+        f.write(response.content)
 
 
 def load_data_from_file(file_path):

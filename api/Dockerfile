@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the API port
-EXPOSE 5000
+EXPOSE 8080
 
 # Set the entrypoint command
-CMD [ "python", "server.py" ]
+CMD [ "python", "app.py" ]

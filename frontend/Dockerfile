@@ -12,6 +12,6 @@ COPY public ./public
 COPY src ./src
 COPY index.html ./index.html
 
-EXPOSE 3000
+EXPOSE 1337
 
 CMD [ "npm", "run", "dev" ]
