@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from forecasting import Forecast, load_data_from_file
 from store import Store
@@ -58,15 +59,22 @@ def create_app(forecast_instance, store_instance):
 
 
 if __name__ == "__main__":
+    load_dotenv()
+
     encryption_key_string = os.environ.get("ENCRYPTION_KEY")
     if not encryption_key_string:
         raise ValueError("ENCRYPTION_KEY environment variable must be set")
-    key = encryption_key_string.encode()
+    encryption_key = encryption_key_string.encode()
 
     store_url = os.getenv("STORE_URL")
     if not store_url:
         raise ValueError("STORE_URL environment variable must be set")
-    store = Store(store_url, encryption_key=key)
+    store = Store(store_url, encryption_key)
+
+    if store.is_connected():
+        print("Connected to store")
+    else:
+        raise ConnectionError("Failed to connect to store")
 
     forecast_instance = Forecast(load_data_from_file("./data/dispersion.nc"))
 
