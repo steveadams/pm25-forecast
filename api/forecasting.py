@@ -2,6 +2,7 @@ import os
 import numpy as np
 from netCDF4 import Dataset  # type: ignore
 import requests
+from datetime import datetime, timedelta
 
 from helpers import convert_to_iso
 
@@ -118,12 +119,23 @@ class Forecast:
         times = tflags[:, 1]
 
         # Convert the dates and times to strings in YYYY-MM-DD HH:MM:SS format
-        date_strings = [
-            str(date)[:4] + "-" + str(date)[4:6] + "-" + str(date)[6:] for date in dates
-        ]
+        date_strings = []
+        for date in dates:
+            year = int(str(date)[:4])
+            day_of_year = int(str(date)[4:])
+            start_of_year = datetime(year, 1, 1)
+            date = start_of_year + timedelta(days=day_of_year - 1)
+            date_strings.append(date.strftime("%Y-%m-%d"))
+
         time_strings = [
-            str(time)[:2] + ":" + str(time)[2:4] + ":" + str(time)[4:] for time in times
+            str(time).zfill(6)[:2]
+            + ":"
+            + str(time).zfill(6)[2:4]
+            + ":"
+            + str(time).zfill(6)[4:]
+            for time in times
         ]
+
         datetime_strings = [
             date + " " + time for date, time in zip(date_strings, time_strings)
         ]

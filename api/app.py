@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from flask import current_app, Flask, jsonify, request
+from flask_cors import CORS
 from mailchimp_marketing.api_client import ApiClientError
 from forecasting import fetch_forecast_data
 
@@ -17,6 +18,8 @@ def create_app(config_object=None):
         app.config.from_object(config_object)
     else:
         app.config.from_object(load_default_config())
+
+    CORS(app, origins=app.config["CLIENT_URL"])
 
     @app.route("/", methods=["GET"])
     def index():

@@ -1,19 +1,52 @@
-import { FC } from 'react';
+import { FC, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
+import 'chart.js/auto';
 
 interface ChartProps {
   data: [datetime: string, value: number][];
 }
 
-const TimeSeriesChart: FC<ChartProps> = ({ data }) => {
-  const datetimes = data.map((tuple) => tuple[0]);
+const Chart: FC<ChartProps> = ({ data }) => {
+  const ref = useRef();
+
+  const datetimes = data.map((tuple) => {
+    let date = new Date(tuple[0]);
+
+    let monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    let monthName = monthNames[date.getMonth()];
+
+    let day = date.getDate();
+
+    let hour = date.getHours() % 12;
+    if (hour === 0) {
+      hour = 12;
+    }
+
+    let period = date.getHours() >= 12 ? 'pm' : 'am';
+
+    return `${monthName} ${day}, ${hour}${period}`;
+  });
+
   const values = data.map((tuple) => tuple[1]);
 
   const chartData = {
     labels: datetimes,
     datasets: [
       {
-        label: 'PM2.5 levels',
+        label: 'pm2.5 level',
         data: values,
         fill: false,
         backgroundColor: 'rgb(75, 192, 192)',
@@ -25,9 +58,9 @@ const TimeSeriesChart: FC<ChartProps> = ({ data }) => {
   // Render the line chart
   return (
     <div>
-      <Line data={chartData} />
+      <Line ref={ref} data={chartData} />
     </div>
   );
 };
 
-export { TimeSeriesChart };
+export { Chart };
