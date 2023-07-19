@@ -18,6 +18,10 @@ def create_app(config_object=None):
     else:
         app.config.from_object(load_default_config())
 
+    @app.route("/", methods=["GET"])
+    def index():
+        return "hello world", 200
+
     @app.route("/health", methods=["GET"])
     def healthcheck():
         ping_response = current_app.config["MAILCHIMP"].ping.get()
