@@ -4,11 +4,11 @@ import { GeocoderControl } from './GeocoderControl';
 import { Dispatch, FC, SetStateAction } from 'react';
 import { Coords } from '../App';
 
-type SearchMapProps = {
+interface SearchMapProps extends React.HTMLAttributes<HTMLDivElement> {
   latitude: number;
   longitude: number;
   setCoords: Dispatch<SetStateAction<Coords>>;
-};
+}
 
 const TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'token-is-missing';
 
@@ -16,7 +16,9 @@ const SearchMap: FC<SearchMapProps> = (props) => {
   // const { bounds, loading } = useBounds();
 
   return (
-    <div className="w-full h-96">
+    <div
+      className={`mx-auto my-6 w-full max-w-3xl h-72 overflow-hidden rounded-lg ${props.className}`}
+    >
       <Map
         id="map"
         initialViewState={{
@@ -32,7 +34,12 @@ const SearchMap: FC<SearchMapProps> = (props) => {
           });
         }}
       >
-        <Marker key={`marker`} {...props} anchor="bottom">
+        <Marker
+          key={`marker`}
+          latitude={props.latitude}
+          longitude={props.longitude}
+          anchor="bottom"
+        >
           <Pin />
         </Marker>
         <GeolocateControl

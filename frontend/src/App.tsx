@@ -24,7 +24,7 @@ function App() {
     latitude: 49.0561341,
     longitude: -122.4919411,
   });
-  const { forecast } = useForecast(coords.latitude, coords.longitude);
+  const { forecast, loading } = useForecast(coords.latitude, coords.longitude);
 
   return (
     <main className="container mx-auto my-6 max-w-5xl">
@@ -41,11 +41,16 @@ function App() {
         </p>
       </span> */}
 
-      <SearchMap {...coords} setCoords={setCoords} />
+      <SearchMap
+        className={loading ? 'animate-pulse' : 'animate-none'}
+        {...coords}
+        setCoords={setCoords}
+      />
       {forecast ? <Chart data={forecast?.timeseries} /> : <>one sec</>}
 
       {forecast ? (
         <Stats
+          className={loading ? 'animate-pulse' : 'animate-none'}
           stats={[
             {
               name: 'Minimum pm2.5',

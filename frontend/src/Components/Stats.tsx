@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-interface StatsProps {
+interface StatsProps extends React.HTMLAttributes<HTMLDivElement> {
   stats: {
     name: string;
     value: string;
@@ -9,9 +9,11 @@ interface StatsProps {
   }[];
 }
 
-const Stats: FC<StatsProps> = ({ stats }) => {
+const Stats: FC<StatsProps> = ({ className, stats }) => {
   return (
-    <div className="bg-gray-900 text-left sm:rounded-xl overflow-hidden my-6">
+    <div
+      className={`bg-gray-900 text-left sm:rounded-xl overflow-hidden my-6 ${className}`}
+    >
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 gap-px bg-white/5 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (

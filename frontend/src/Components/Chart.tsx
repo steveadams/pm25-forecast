@@ -2,11 +2,11 @@ import { FC, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 
-interface ChartProps {
+interface ChartProps extends React.HTMLAttributes<HTMLDivElement> {
   data: [datetime: string, value: number][];
 }
 
-const Chart: FC<ChartProps> = ({ data }) => {
+const Chart: FC<ChartProps> = ({ className, data }) => {
   const ref = useRef();
 
   const datetimes = data.map((tuple) => {
@@ -57,7 +57,7 @@ const Chart: FC<ChartProps> = ({ data }) => {
 
   // Render the line chart
   return (
-    <div>
+    <div className={className}>
       <Line ref={ref} data={chartData} />
     </div>
   );

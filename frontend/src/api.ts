@@ -49,6 +49,9 @@ const useForecast = (lat: number, lon: number) => {
   const { data, error } = useSWR<Forecast>(
     `/forecast/${lat}/${lon}`,
     apiFetcher,
+    {
+      keepPreviousData: true,
+    },
   );
 
   const loading = !data && !error;
