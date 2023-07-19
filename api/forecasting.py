@@ -7,13 +7,15 @@ from helpers import convert_to_iso
 
 
 def fetch_forecast_data():
-    print("Fetching forecast data")
+    print("fetching forecast data...")
 
     url = "https://firesmoke.ca/forecasts/current/dispersion.nc"
     response = requests.get(url)
 
     if response.status_code != 200:
-        raise ValueError("Failed to fetch forecast data")
+        raise ValueError("failed to fetch forecast data")
+
+    print("fetched forecast data.")
 
     filename = f"./data/dispersion.nc"
 
