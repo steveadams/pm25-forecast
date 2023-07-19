@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from netCDF4 import Dataset  # type: ignore
 import requests
@@ -15,6 +16,9 @@ def fetch_forecast_data():
         raise ValueError("Failed to fetch forecast data")
 
     filename = f"./data/dispersion.nc"
+
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
 
     with open(filename, "wb") as f:
         f.write(response.content)
