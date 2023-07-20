@@ -48,14 +48,19 @@ const Chart: FC<ChartProps> = ({ className, data }) => {
       {
         label: 'pm2.5 level',
         data: values,
-        fill: false,
-        backgroundColor: 'rgb(75, 192, 192)',
-        borderColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+        // backgroundColor: 'rgb(75, 192, 192)',
+        // borderColor: 'rgba(75, 192, 192, 0.2)',
       },
     ],
+    legend: {
+      boxHeight: 20,
+      boxWidth: 20,
+      borderRadius: 10,
+      useBorderRadius: true,
+    },
   };
 
-  // Render the line chart
   return (
     <div className={className}>
       <Line ref={ref} data={chartData} />

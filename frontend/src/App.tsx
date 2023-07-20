@@ -26,28 +26,11 @@ function App() {
   });
   const { forecast, loading } = useForecast(coords);
 
-  // useEffect(() => {
-  //   // get user coordinates with geolocation
-  //   navigator.geolocation.getCurrentPosition((position) => {
-  //     setLatitude(position.coords.latitude);
-  //     setLongitude(position.coords.longitude);
-  //   });
-  // }, [latitude, longitude]);
-
   return (
     <main className="container mx-auto my-6 max-w-5xl">
       <Header />
 
       <h2 className="text-2xl font-bold text-center my-6">Where are you?</h2>
-
-      {/* <span className="text-center my-4 block">
-        <p className="text-center text-lg mb-2">
-          Let us give you a 24h forecast of the smoke and weather in your area.
-        </p>
-        <p className="text-slate-500 italic text-sm dark:text-gray-300">
-          We don't record this unless you ask us to notify you.
-        </p>
-      </span> */}
 
       <SearchMap
         className={loading ? 'animate-pulse' : 'animate-none'}
