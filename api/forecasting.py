@@ -11,13 +11,12 @@ import zipfile
 
 from helpers import convert_to_iso
 
-fire_perimeter_zip_url = "https://pub.data.gov.bc.ca/datasets/cdfc2d7b-c046-4bf0-90ac-4897232619e1/prot_current_fire_polys.zip"
-fire_perimeter_files_directory = "./data"
-fire_perimeter_shp_file_path = "./data/prot_current_fire_polys.shp"
-fire_perimeter_geojson_file_path = "./data/prot_current_fire_polys.geojson"
+fire_perimeters_url = "https://cwfis.cfs.nrcan.gc.ca/downloads/hotspots/perimeters"
+fire_perimeters_files_directory = "./data/perimeters/"
+fire_perimeters_file_name = "fire_perimeters"
 
 dispersion_file_url = "https://firesmoke.ca/forecasts/current/dispersion.nc"
-dispersion_file_path = "./data/dispersion.nc"
+dispersion_file_path = "./data/dispersion/dispersion.nc"
 
 """Load dispersion forecast data from the firesmoke.ca website"""
 
@@ -26,17 +25,14 @@ def update_forecast_data():
     print("updating forecast data...")
 
     response = requests.get(dispersion_file_url)
+    response.raise_for_status()
 
-    if response.status_code != 200:
-        raise ValueError("failed to fetch forecast data")
-
-    print("updated forecast data.")
-
-    # Ensure the directory exists
     os.makedirs(os.path.dirname(dispersion_file_path), exist_ok=True)
 
     with open(dispersion_file_path, "wb") as f:
         f.write(response.content)
+
+    print("updated forecast data.")
 
 
 def load_dispersion_data():
@@ -54,27 +50,36 @@ def load_dispersion_data():
 def update_fire_perimeter_data():
     print("updating fire perimeter data...")
 
-    response = requests.get(fire_perimeter_zip_url)
-    response.raise_for_status()
+    file_extensions = ["shp", "shx", "dbf", "prj"]
 
-    zip_file = io.BytesIO(response.content)
-    with zipfile.ZipFile(zip_file, "r") as z:
-        z.extractall(fire_perimeter_files_directory)
+    for extension in file_extensions:
+        url = fire_perimeters_url + "." + extension
+        file_path = os.path.join(
+            fire_perimeters_files_directory, fire_perimeters_file_name + "." + extension
+        )
 
-    perimeters_shp = geopandas.read_file(fire_perimeter_shp_file_path)
-    perimeters_shp = perimeters_shp.to_crs("EPSG:4326")
+        response = requests.get(url)
+        response.raise_for_status()
 
-    threshold_area = 0.00001
-    perimeters_shp["geometry"] = perimeters_shp["geometry"].apply(
-        lambda geom: geom.simplify(tolerance=0.001, preserve_topology=True)
-        if isinstance(geom, Polygon) and geom.area > threshold_area
-        else geom
+        with open(file_path, "wb") as f:
+            f.write(response.content)
+
+    perimeters_shp = geopandas.read_file(
+        os.path.join(
+            fire_perimeters_files_directory, fire_perimeters_file_name + ".shp"
+        )
     )
 
-    geojson = perimeters_shp.to_json()
-    # geojson = correct_geojson(geojson)
+    perimeters_shp = perimeters_shp.to_crs("EPSG:4326")
 
-    with open(fire_perimeter_geojson_file_path, "w") as f:
+    geojson = perimeters_shp.to_json()
+
+    with open(
+        os.path.join(
+            fire_perimeters_files_directory, fire_perimeters_file_name + ".geojson"
+        ),
+        "w",
+    ) as f:
         f.write(geojson)
 
     print("updated fire perimeter data.")
@@ -84,7 +89,10 @@ def load_fire_perimeter_data():
     def loader():
         update_fire_perimeter_data()
 
-        with open(fire_perimeter_geojson_file_path, "r") as data:
+        with open(
+            fire_perimeters_files_directory + fire_perimeters_file_name + ".geojson",
+            "r",
+        ) as data:
             return json.loads(data.read())
 
     return loader
