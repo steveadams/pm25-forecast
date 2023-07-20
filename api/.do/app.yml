@@ -15,13 +15,13 @@ services:
   envs:
   - key: MAILCHIMP_API_KEY
     scope: RUN_AND_BUILD_TIME
-    value: f42fde5e8307aa665684c1eba75cb8cc-us21
+    value: <MAILCHIMP_API_KEY>
   - key: MAILCHIMP_LIST_ID
     scope: RUN_AND_BUILD_TIME
-    value: 9ac598921f
+    value: <MAILCHIMP_LIST_ID>
   - key: MAILCHIMP_SERVER_PREFIX
     scope: RUN_AND_BUILD_TIME
-    value: us21
+    value: <MAILCHIMP_SERVER_PREFIX>
   github:
     branch: main
     deploy_on_push: true
