@@ -52,6 +52,8 @@ def update_fire_perimeter_data():
 
     file_extensions = ["shp", "shx", "dbf", "prj"]
 
+    os.makedirs(os.path.dirname(fire_perimeters_files_directory), exist_ok=True)
+
     for extension in file_extensions:
         url = fire_perimeters_url + "." + extension
         file_path = os.path.join(
