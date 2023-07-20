@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-import numpy as np
-from netCDF4 import Dataset  # type: ignore
+import json
+from shapely.geometry import shape, Polygon, MultiPolygon
 
 
 def convert_to_iso(date, time):
@@ -21,59 +21,28 @@ def convert_to_iso(date, time):
     return datetime_iso
 
 
-def load_test_data():
-    def loader():
-        data = Dataset("inmemory.nc", "w", format="NETCDF4", diskless=True)
+def correct_geojson(input_geojson):
+    data = json.loads(input_geojson)
 
-        # Create dimensions
-        data.createDimension("TSTEP", 51)
-        data.createDimension("VAR", 1)
-        data.createDimension("DATE-TIME", 2)
-        data.createDimension("LAY", 1)
-        data.createDimension("ROW", 381)
-        data.createDimension("COL", 1081)
+    def correct_polygon(polygon):
+        exterior = list(polygon.exterior.coords)
+        interiors = [
+            list(interior.coords) if interior.is_ccw else list(interior.coords)[::-1]
+            for interior in polygon.interiors
+        ]
 
-        # Create variables
-        data.createVariable("TFLAG", "i4", ("TSTEP", "VAR", "DATE-TIME"))
-        data.createVariable("PM25", "f4", ("TSTEP", "LAY", "ROW", "COL"))
+        return Polygon(exterior, interiors)
 
-        # Fill variables
-        data.variables["TFLAG"][:] = np.ones((51, 1, 2), dtype=np.int32)
-        data.variables["PM25"][:] = np.ones((51, 1, 381, 1081), dtype=np.float32)
+    for feature in data["features"]:
+        geometry = shape(feature["geometry"])
+        if isinstance(geometry, Polygon):
+            feature["geometry"] = correct_polygon(geometry).__geo_interface__
+        elif isinstance(geometry, MultiPolygon):
+            corrected_polygons = [
+                correct_polygon(polygon) for polygon in geometry.geoms
+            ]
+            feature["geometry"] = MultiPolygon(corrected_polygons).__geo_interface__
+        else:
+            continue
 
-        # Set global attributes
-        data.FTYPE = 1
-        data.CDATE = 2023194
-        data.CTIME = 183524
-        data.WDATE = 2023194
-        data.WTIME = 183524
-        data.SDATE = 2023194
-        data.STIME = 150000
-        data.TSTEP = 10000
-        data.NTHIK = 1
-        data.NCOLS = 1081
-        data.NROWS = 381
-        data.NLAYS = 1
-        data.NVARS = 1
-        data.GDTYP = 1
-        data.P_ALP = 0.0
-        data.P_BET = 0.0
-        data.P_GAM = 0.0
-        data.XCENT = -106.0
-        data.YCENT = 51.0
-        data.XORIG = -160.0
-        data.YORIG = 32.0
-        data.XCELL = 0.10000000149011612
-        data.YCELL = 0.10000000149011612
-        data.VGTYP = 5
-        data.VGTOP = -9999.0
-        data.VGLVLS = np.array([10.0, 0.0], dtype=np.float32)
-        data.GDNAM = "HYSPLIT CONC    "
-        data.UPNAM = "hysplit2netCDF  "
-        data.VAR_LIST = "PM25            "
-        data.FILEDESC = "Hysplit Concentration Model Output"
-        data.HISTORY = ""
-
-        return data
-
-    return loader
+    return json.dumps(data)

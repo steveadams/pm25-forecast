@@ -6,7 +6,7 @@ import { Subscribe } from './Components/Subscribe';
 import { SearchMap } from './Components/Map';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useForecast } from './api';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Coords = {
   latitude: number;
@@ -20,11 +20,17 @@ const mgPerM3 = (
 );
 
 function App() {
-  const [coords, setCoords] = useState<Coords>({
-    latitude: 49.0561341,
-    longitude: -122.4919411,
-  });
-  const { forecast, loading } = useForecast(coords.latitude, coords.longitude);
+  const [latitude, setLatitude] = useState<number>(49.0561341);
+  const [longitude, setLongitude] = useState<number>(-122.4919411);
+  const { forecast, loading } = useForecast(latitude, longitude);
+
+  useEffect(() => {
+    // get user coordinates with geolocation
+    navigator.geolocation.getCurrentPosition((position) => {
+      setLatitude(position.coords.latitude);
+      setLongitude(position.coords.longitude);
+    });
+  }, [latitude, longitude]);
 
   return (
     <main className="container mx-auto my-6 max-w-5xl">
@@ -43,10 +49,12 @@ function App() {
 
       <SearchMap
         className={loading ? 'animate-pulse' : 'animate-none'}
-        {...coords}
-        setCoords={setCoords}
+        latitude={latitude}
+        longitude={longitude}
+        setLatitude={setLatitude}
+        setLongitude={setLongitude}
       />
-      {forecast ? <Chart data={forecast?.timeseries} /> : <>one sec</>}
+      {forecast ? <Chart data={forecast?.timeseries} /> : <>...</>}
 
       {forecast ? (
         <Stats
@@ -65,22 +73,15 @@ function App() {
               meta: 'around 7am',
             },
             {
-              name: 'Average Range',
-              value: String(
-                (
-                  forecast.timeseries.reduce((acc, curr) => {
-                    return acc + curr[1];
-                  }, 0) / forecast.timeseries.length
-                ).toFixed(2),
-              ),
-              unit: mgPerM3,
-              meta: 'low risk',
+              name: 'Worst Projected AQI',
+              value: String(forecast.aqi.rating),
+              meta: forecast.aqi.category,
             },
             { name: 'Humidity', value: '58.5%' },
           ]}
         />
       ) : (
-        <>one sec</>
+        <>...</>
       )}
 
       <Subscribe />

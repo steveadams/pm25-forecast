@@ -1,31 +1,25 @@
 import unittest
 
 from app import create_app
-from forecasting import Forecast
-from helpers import load_test_data
-
-
-class TestConfig(object):
-    FORECAST_INSTANCE = Forecast(load_test_data())
-    MAILCHIMP_API_KEY = "anything"
+from config import load_test_config
 
 
 class TestServer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.app = create_app(TestConfig).test_client()
-        cls.forecast = cls.app.application.config["forecast"]
+        cls.app = create_app(load_test_config()).test_client()
 
     @classmethod
     def tearDownClass(cls):
-        cls.forecast.close_data()
+        cls.app.application.config["FORECAST"].close_data()
 
     def test_health_check(self):
         response = self.app.get("/health")
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
         self.assertIsNotNone(json_data, "No data returned!")
-        self.assertIn("status", json_data)
+        self.assertIn("forecaster", json_data)
+        self.assertIn("mailchimp", json_data)
 
     def test_get_bounds(self):
         response = self.app.get("/bounds")

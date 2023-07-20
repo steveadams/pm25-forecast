@@ -2,17 +2,11 @@ from dotenv import load_dotenv
 from flask import current_app, Flask, jsonify, request
 from flask_cors import CORS
 from mailchimp_marketing.api_client import ApiClientError
-from forecasting import fetch_forecast_data
 
 from config import load_default_config
 
 
 def create_app(config_object=None):
-    load_dotenv()
-
-    # Import forecast data from the web
-    fetch_forecast_data()
-
     app = Flask(__name__)
     if config_object is not None:
         app.config.from_object(config_object)
@@ -56,12 +50,23 @@ def create_app(config_object=None):
     def get_forecast(lat, lon):
         lat = float(lat)
         lon = float(lon)
-        timeseries, max, min = current_app.config["FORECAST"].get_forecast(lat, lon)
+        timeseries, max, min, aqi = current_app.config["FORECAST"].get_forecast(
+            lat, lon
+        )
 
         if timeseries is None or max is None or min is None:
-            return jsonify({"error": "Failed to get forecast"}), 500
+            return jsonify({"error": "Failed to get forecast"}), 404
 
-        return jsonify({"max": max, "min": min, "timeseries": timeseries})
+        return jsonify({"max": max, "min": min, "timeseries": timeseries, "aqi": aqi})
+
+    @app.route("/fire_perimeters", methods=["GET"])
+    def get_fire_perimeters():
+        perimeters = current_app.config["FORECAST"].get_fire_perimeters()
+
+        if perimeters is None:
+            return jsonify({"error": "Failed to get forecast"}), 404
+
+        return jsonify(perimeters)
 
     @app.route("/subscribe", methods=["POST"])
     def subscribe():
@@ -80,8 +85,6 @@ def create_app(config_object=None):
                 jsonify({"error": "must include email_address, lat, and lon"}),
                 400,
             )
-
-        print(email_address, lat, lon)
 
         response = current_app.config["MAILCHIMP"].lists.add_list_member(
             current_app.config["MAILCHIMP_LIST_ID"],
@@ -113,4 +116,4 @@ def create_app(config_object=None):
 # Create main entry
 if __name__ == "__main__":
     app = create_app(load_default_config())
-    app.run()
+    app.run(debug=True)

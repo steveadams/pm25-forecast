@@ -1,37 +1,84 @@
-import Map, { GeolocateControl, Marker } from 'react-map-gl';
+import Map, {
+  GeolocateControl,
+  Layer,
+  LayerProps,
+  // MapEvent,
+  MapRef,
+  Marker,
+  Source,
+} from 'react-map-gl';
+// import { GeoJSONSource } from 'mapbox-gl';
 import { GeocoderControl } from './GeocoderControl';
-// import { useBounds } from '../api';
-import { Dispatch, FC, SetStateAction } from 'react';
-import { Coords } from '../App';
+import { Dispatch, FC, SetStateAction, useEffect, useRef } from 'react';
 
 interface SearchMapProps extends React.HTMLAttributes<HTMLDivElement> {
   latitude: number;
   longitude: number;
-  setCoords: Dispatch<SetStateAction<Coords>>;
+  setLatitude: Dispatch<SetStateAction<number>>;
+  setLongitude: Dispatch<SetStateAction<number>>;
 }
 
 const TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'token-is-missing';
 
 const SearchMap: FC<SearchMapProps> = (props) => {
-  // const { bounds, loading } = useBounds();
+  const mapRef = useRef<MapRef>(null);
+
+  // const onLoad = (event: MapEvent) => {
+  //   if (!mapRef.current) {
+  //     return;
+  //   }
+
+  //   // @ts-ignore
+  //   console.log(event);
+  //   console.log('features', event.features[0]);
+  //   const feature = event.features[0];
+  //   const clusterId = feature.properties.cluster_id;
+
+  //   const mapboxSource = mapRef.current.getSource(
+  //     'fire_perimeters',
+  //   ) as any as GeoJSONSource;
+
+  //   mapboxSource.getClusterExpansionZoom(clusterId, (err, zoom) => {
+  //     if (err || mapRef.current === null) {
+  //       return;
+  //     }
+
+  //     mapRef.current.easeTo({
+  //       center: feature.geometry.coordinates,
+  //       zoom,
+  //       duration: 500,
+  //     });
+  //   });
+  // };
+
+  useEffect(() => {
+    if (!mapRef.current) {
+      return;
+    }
+
+    mapRef.current.easeTo({
+      center: [props.longitude, props.latitude],
+      duration: 500,
+    });
+  }, [props.latitude, props.longitude]);
 
   return (
     <div
-      className={`mx-auto my-6 w-full max-w-3xl h-72 overflow-hidden rounded-lg ${props.className}`}
+      className={`mx-auto my-6 w-full max-w-3xl h-96 overflow-hidden rounded-lg ${props.className}`}
     >
       <Map
         id="map"
+        ref={mapRef}
         initialViewState={{
-          zoom: 9,
-          ...props,
+          zoom: 5,
+          latitude: props.latitude,
+          longitude: props.longitude,
         }}
         mapStyle="mapbox://styles/mapbox/streets-v9"
         mapboxAccessToken={TOKEN}
         onClick={(e) => {
-          props.setCoords({
-            latitude: e.lngLat.lat,
-            longitude: e.lngLat.lng,
-          });
+          props.setLatitude(e.lngLat.lat);
+          props.setLongitude(e.lngLat.lng);
         }}
       >
         <Marker
@@ -42,18 +89,30 @@ const SearchMap: FC<SearchMapProps> = (props) => {
         >
           <Pin />
         </Marker>
+
+        <Source
+          id="fire_perimeters"
+          type="geojson"
+          data={import.meta.env.VITE_API_BASE_URL + '/fire_perimeters'}
+        >
+          <Layer {...outlineLayer} />
+          <Layer {...fillLayer} />
+        </Source>
+
         <GeolocateControl
-          onGeolocate={({ coords }) => props.setCoords(coords)}
+          onGeolocate={({ coords }) => {
+            props.setLatitude(coords.latitude);
+            props.setLongitude(coords.longitude);
+          }}
+          showUserLocation={false}
         />
         <GeocoderControl
           mapboxAccessToken={TOKEN}
           position="top-left"
-          onResult={(e) =>
-            props.setCoords(() => {
-              const coords = (e as any).result.geometry.coordinates;
-              return { latitude: coords[1], longitude: coords[0] };
-            })
-          }
+          onResult={(e) => {
+            props.setLatitude((e as any).result.center[1]);
+            props.setLongitude((e as any).result.center[0]);
+          }}
         />
       </Map>
     </div>
@@ -78,3 +137,27 @@ function Pin({ size = 20 }) {
 }
 
 export { SearchMap };
+
+const fillLayer: LayerProps = {
+  id: 'fire_perimeters_fill',
+  type: 'fill',
+  source: 'fire_perimeters',
+  layout: {},
+  paint: {
+    'fill-color': '#f97316',
+    'fill-opacity': 0.5,
+  },
+  filter: ['==', '$type', 'Polygon'],
+};
+
+const outlineLayer: LayerProps = {
+  id: 'fire_perimeters_outline',
+  type: 'line',
+  source: 'fire_perimeters',
+  layout: {},
+  paint: {
+    'line-color': '#ea580c',
+    'line-width': 2,
+  },
+  filter: ['==', '$type', 'Polygon'],
+};

@@ -9,6 +9,10 @@ type Forecast = {
   max: number;
   min: number;
   timeseries: [string, number][];
+  aqi: {
+    rating: number;
+    category: string;
+  };
 };
 
 const apiBaseURL = import.meta.env.VITE_API_BASE_URL as string;

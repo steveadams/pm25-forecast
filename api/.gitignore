@@ -1,4 +1,5 @@
 .env
+.flaskenv
 data/*
 __pycache__/*
 
