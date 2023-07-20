@@ -1,4 +1,5 @@
 import useSWR from 'swr';
+import { Coords } from './App';
 
 type Bounds = [[number, number], [number, number]];
 type BoundsData = {
@@ -49,9 +50,9 @@ const useBounds = () => {
   };
 };
 
-const useForecast = (lat: number, lon: number) => {
+const useForecast = ({ latitude, longitude }: Coords) => {
   const { data, error } = useSWR<Forecast>(
-    `/forecast/${lat}/${lon}`,
+    `/forecast/${latitude}/${longitude}`,
     apiFetcher,
     {
       keepPreviousData: true,

@@ -6,7 +6,7 @@ import { Subscribe } from './Components/Subscribe';
 import { SearchMap } from './Components/Map';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useForecast } from './api';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 type Coords = {
   latitude: number;
@@ -20,17 +20,19 @@ const mgPerM3 = (
 );
 
 function App() {
-  const [latitude, setLatitude] = useState<number>(49.0561341);
-  const [longitude, setLongitude] = useState<number>(-122.4919411);
-  const { forecast, loading } = useForecast(latitude, longitude);
+  const [coords, setCoords] = useState<Coords>({
+    latitude: 49.0561341,
+    longitude: -122.4919411,
+  });
+  const { forecast, loading } = useForecast(coords);
 
-  useEffect(() => {
-    // get user coordinates with geolocation
-    navigator.geolocation.getCurrentPosition((position) => {
-      setLatitude(position.coords.latitude);
-      setLongitude(position.coords.longitude);
-    });
-  }, [latitude, longitude]);
+  // useEffect(() => {
+  //   // get user coordinates with geolocation
+  //   navigator.geolocation.getCurrentPosition((position) => {
+  //     setLatitude(position.coords.latitude);
+  //     setLongitude(position.coords.longitude);
+  //   });
+  // }, [latitude, longitude]);
 
   return (
     <main className="container mx-auto my-6 max-w-5xl">
@@ -49,10 +51,8 @@ function App() {
 
       <SearchMap
         className={loading ? 'animate-pulse' : 'animate-none'}
-        latitude={latitude}
-        longitude={longitude}
-        setLatitude={setLatitude}
-        setLongitude={setLongitude}
+        coords={coords}
+        setCoords={setCoords}
       />
       {forecast ? <Chart data={forecast?.timeseries} /> : <>...</>}
 

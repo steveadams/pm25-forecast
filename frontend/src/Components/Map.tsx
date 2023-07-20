@@ -1,92 +1,64 @@
 import Map, {
+  FullscreenControl,
   GeolocateControl,
   Layer,
   LayerProps,
-  // MapEvent,
   MapRef,
   Marker,
+  NavigationControl,
   Source,
 } from 'react-map-gl';
-// import { GeoJSONSource } from 'mapbox-gl';
 import { GeocoderControl } from './GeocoderControl';
-import { Dispatch, FC, SetStateAction, useEffect, useRef } from 'react';
+import { Dispatch, FC, SetStateAction, useCallback, useRef } from 'react';
+import { Coords } from '../App';
 
 interface SearchMapProps extends React.HTMLAttributes<HTMLDivElement> {
-  latitude: number;
-  longitude: number;
-  setLatitude: Dispatch<SetStateAction<number>>;
-  setLongitude: Dispatch<SetStateAction<number>>;
+  coords: Coords;
+  setCoords: Dispatch<SetStateAction<Coords>>;
 }
 
 const TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'token-is-missing';
 
-const SearchMap: FC<SearchMapProps> = (props) => {
+const SearchMap: FC<SearchMapProps> = ({ className, coords, setCoords }) => {
   const mapRef = useRef<MapRef>(null);
 
-  // const onLoad = (event: MapEvent) => {
-  //   if (!mapRef.current) {
-  //     return;
-  //   }
+  const setAndFlyTo = useCallback(
+    ({ latitude, longitude }: Coords) => {
+      setCoords({ latitude, longitude });
 
-  //   // @ts-ignore
-  //   console.log(event);
-  //   console.log('features', event.features[0]);
-  //   const feature = event.features[0];
-  //   const clusterId = feature.properties.cluster_id;
+      mapRef.current?.flyTo({
+        center: [longitude, latitude],
+        zoom: 6,
+        duration: 2000,
+        curve: 1,
+      });
+    },
+    [setCoords],
+  );
 
-  //   const mapboxSource = mapRef.current.getSource(
-  //     'fire_perimeters',
-  //   ) as any as GeoJSONSource;
-
-  //   mapboxSource.getClusterExpansionZoom(clusterId, (err, zoom) => {
-  //     if (err || mapRef.current === null) {
-  //       return;
-  //     }
-
-  //     mapRef.current.easeTo({
-  //       center: feature.geometry.coordinates,
-  //       zoom,
-  //       duration: 500,
-  //     });
-  //   });
-  // };
-
-  useEffect(() => {
-    if (!mapRef.current) {
-      return;
-    }
-
-    mapRef.current.easeTo({
-      center: [props.longitude, props.latitude],
-      duration: 500,
-    });
-  }, [props.latitude, props.longitude]);
+  const initialViewState = {
+    ...coords,
+    zoom: 5,
+    bearing: 0,
+    pitch: 0,
+  };
 
   return (
     <div
-      className={`mx-auto my-6 w-full max-w-3xl h-96 overflow-hidden rounded-lg ${props.className}`}
+      className={`mx-auto my-6 w-full max-w-3xl h-96 overflow-hidden rounded-lg ${className}`}
     >
       <Map
         id="map"
         ref={mapRef}
-        initialViewState={{
-          zoom: 5,
-          latitude: props.latitude,
-          longitude: props.longitude,
-        }}
+        initialViewState={initialViewState}
         mapStyle="mapbox://styles/mapbox/streets-v9"
         mapboxAccessToken={TOKEN}
         onClick={(e) => {
-          props.setLatitude(e.lngLat.lat);
-          props.setLongitude(e.lngLat.lng);
+          const { lat, lng } = e.lngLat;
+          setCoords({ latitude: lat, longitude: lng });
         }}
       >
-        <Marker
-          key={`marker`}
-          latitude={props.latitude}
-          longitude={props.longitude}
-          anchor="bottom"
-        >
+        <Marker key={`marker`} {...coords} anchor="bottom">
           <Pin />
         </Marker>
 
@@ -101,17 +73,26 @@ const SearchMap: FC<SearchMapProps> = (props) => {
 
         <GeolocateControl
           onGeolocate={({ coords }) => {
-            props.setLatitude(coords.latitude);
-            props.setLongitude(coords.longitude);
+            setAndFlyTo({
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+            });
           }}
           showUserLocation={false}
+          position="top-left"
         />
+
+        <FullscreenControl position="top-left" />
+        <NavigationControl position="top-left" />
+
         <GeocoderControl
           mapboxAccessToken={TOKEN}
-          position="top-left"
+          position="top-right"
           onResult={(e) => {
-            props.setLatitude((e as any).result.center[1]);
-            props.setLongitude((e as any).result.center[0]);
+            setAndFlyTo({
+              latitude: (e as any).result.center[1],
+              longitude: (e as any).result.center[0],
+            });
           }}
         />
       </Map>
@@ -148,6 +129,7 @@ const fillLayer: LayerProps = {
     'fill-opacity': 0.5,
   },
   filter: ['==', '$type', 'Polygon'],
+  // minzoom: 7,
 };
 
 const outlineLayer: LayerProps = {
@@ -160,4 +142,5 @@ const outlineLayer: LayerProps = {
     'line-width': 2,
   },
   filter: ['==', '$type', 'Polygon'],
+  // minzoom: 7,
 };
