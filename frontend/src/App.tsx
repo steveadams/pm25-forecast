@@ -1,19 +1,20 @@
-// import { useState } from 'react';
 import { Stats } from './Components/Stats';
-import { Chart } from './Components/Chart';
 import { Header } from './Components/Header';
-import { Subscribe } from './Components/Subscribe';
+// import { Subscribe } from './Components/Subscribe';
 import { SearchMap } from './Components/Map';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useForecast } from './api';
 import { useState } from 'react';
+import { Chart } from './Components/Chart';
+import dayjs from 'dayjs';
+import { convertPm25ToColor } from './lib';
 
 type Coords = {
   latitude: number;
   longitude: number;
 };
 
-const mgPerM3 = (
+const microGramsPerM3 = (
   <span>
     µg/m<sup>3</sup>
   </span>
@@ -27,47 +28,76 @@ function App() {
   const { forecast, loading } = useForecast(coords);
 
   return (
-    <main className="container mx-auto my-6 max-w-5xl">
+    <main className="container mx-auto max-w-7xl">
       <Header />
+      <div className="p-0 lg:px-2">
+        <div
+          className={`gap-2 lg:gap-4 grid grid-cols-4 mx-auto w-full ${
+            loading ? 'animate-pulse' : 'animate-none'
+          }`}
+        >
+          <div className="w-full h-72 lg:h-96 col-span-4 lg:col-span-2 rounded-none lg:rounded-lg overflow-hidden">
+            <SearchMap
+              className="w-full h-full"
+              coords={coords}
+              setCoords={setCoords}
+            />
+          </div>
 
-      <h2 className="text-2xl font-bold text-center my-6">Where are you?</h2>
+          {forecast ? (
+            <Chart
+              className={`w-full h-72 lg:h-96 col-span-4 lg:col-span-2 rounded-none lg:rounded-lg overflow-hidden ${
+                loading ? 'animate-pulse' : 'animate-none'
+              }`}
+              data={forecast?.data}
+              style={{
+                backgroundColor: convertPm25ToColor(
+                  forecast.meta.max_pm25.value,
+                ),
+              }}
+            />
+          ) : (
+            <>...</>
+          )}
 
-      <SearchMap
-        className={loading ? 'animate-pulse' : 'animate-none'}
-        coords={coords}
-        setCoords={setCoords}
-      />
-      {forecast ? <Chart data={forecast?.timeseries} /> : <>...</>}
+          {forecast ? (
+            <Stats
+              className={
+                'bg-slate-600 col-span-4 rounded-none lg:rounded-lg overflow-hidden ' +
+                (loading ? 'animate-pulse' : 'animate-none')
+              }
+              stats={[
+                {
+                  name: 'Min pm2.5',
+                  value: forecast.meta.min_pm25.value.toFixed(2),
+                  unit: microGramsPerM3,
+                  meta: dayjs(forecast.meta.min_pm25.datetime).format(
+                    'ddd, ha',
+                  ),
+                },
+                {
+                  name: 'Max pm2.5',
+                  value: forecast.meta.max_pm25.value.toFixed(2),
+                  unit: microGramsPerM3,
+                  meta: dayjs(forecast.meta.max_pm25.datetime).format(
+                    'ddd, ha',
+                  ),
+                },
+                {
+                  name: 'Worst AQI',
+                  value: String(forecast.meta.aqi.rating),
+                  meta: forecast.meta.aqi.category,
+                },
+                { name: 'Humidity', value: '58.5%' },
+              ]}
+            />
+          ) : (
+            <>...</>
+          )}
+        </div>
+      </div>
 
-      {forecast ? (
-        <Stats
-          className={loading ? 'animate-pulse' : 'animate-none'}
-          stats={[
-            {
-              name: 'Minimum pm2.5',
-              value: forecast.min.toFixed(2),
-              unit: mgPerM3,
-              meta: 'around 2pm',
-            },
-            {
-              name: 'Maximum pm2.5',
-              value: forecast.max.toFixed(2),
-              unit: mgPerM3,
-              meta: 'around 7am',
-            },
-            {
-              name: 'Worst Projected AQI',
-              value: String(forecast.aqi.rating),
-              meta: forecast.aqi.category,
-            },
-            { name: 'Humidity', value: '58.5%' },
-          ]}
-        />
-      ) : (
-        <>...</>
-      )}
-
-      <Subscribe />
+      {/* <Subscribe /> */}
     </main>
   );
 }

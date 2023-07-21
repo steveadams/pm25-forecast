@@ -1,0 +1,76 @@
+services:
+- name: pm25-api
+- region: tor
+  alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+  domains:
+  - domain: smokebuddy.app
+    type: PRIMARY
+    zone: smokebuddy.app
+  ingress:
+    rules:
+    - component:
+        name: forecast-api
+      match:
+        path:
+          prefix: /api
+  environment_slug: python
+  # envs:
+  # - key: MAILCHIMP_API_KEY
+  #   scope: RUN_AND_BUILD_TIME
+  #   value: <MAILCHIMP_API_KEY>
+  # - key: MAILCHIMP_LIST_ID
+  #   scope: RUN_AND_BUILD_TIME
+  #   value: <MAILCHIMP_LIST_ID>
+  # - key: MAILCHIMP_SERVER_PREFIX
+  #   scope: RUN_AND_BUILD_TIME
+  #   value: <MAILCHIMP_SERVER_PREFIX>
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: steveadams/pm25-forecast
+  http_port: 8080
+  instance_count: 1
+  instance_size_slug: basic-xs
+  run_command: gunicorn --worker-tmp-dir /dev/shm 'app:create_app()'
+  source_dir: api
+
+static_sites:
+- name: pm25-frontend
+- region: tor
+- alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+  domains:
+  - domain: smokebuddy.app
+    type: PRIMARY
+    zone: smokebuddy.app
+  ingress:
+    rules:
+    - component:
+        name: pm25-frontend
+      match:
+        path:
+          prefix: /
+  build_command: npm run build
+  environment_slug: node-js
+  # envs:
+  # - key: VITE_BASE_URL
+  #   scope: BUILD_TIME
+  #   value: <VITE_BASE_URL>
+  # - key: VITE_API_BASE_URL
+  #   scope: BUILD_TIME
+  #   value: <VITE_API_BASE_URL>
+  # - key: VITE_MAPBOX_ACCESS_TOKEN
+  #   scope: BUILD_TIME
+  #   value: <VITE_MAPBOX_ACCESS_TOKEN>
+  # - key: VITE_ANALYTICS_SCRIPT_TAG
+  #   scope: BUILD_TIME
+  #   value: <VITE_ANALYTICS_SCRIPT_TAG>
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: steveadams/pm25-forecast
+  output_dir: dist
+  source_dir: frontend

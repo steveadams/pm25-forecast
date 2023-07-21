@@ -24,6 +24,10 @@ dispersion_file_path = "./data/dispersion/dispersion.nc"
 def update_forecast_data():
     print("updating forecast data...")
 
+    if os.path.isfile(dispersion_file_path):
+        print("forecast data already exists.")
+        return
+
     response = requests.get(dispersion_file_url)
     response.raise_for_status()
 
@@ -51,6 +55,12 @@ def update_fire_perimeter_data():
     print("updating fire perimeter data...")
 
     file_extensions = ["shp", "shx", "dbf", "prj"]
+
+    if os.path.isfile(
+        fire_perimeters_files_directory + fire_perimeters_file_name + ".geojson"
+    ):
+        print("fire perimeter data already exists.")
+        return
 
     os.makedirs(os.path.dirname(fire_perimeters_files_directory), exist_ok=True)
 
@@ -158,29 +168,14 @@ class Forecast:
         return idx
 
     def get_forecast(self, lat, lon):
-        # Get the maximum and minimum PM2.5 levels for the given coordinates
-        # Find the nearest grid cell
         lat_idx = self.find_nearest(self.lat, lat)
         lon_idx = self.find_nearest(self.lon, lon)
 
-        # Extract the PM2.5 data for this cell
-        pm25 = self.forecast.variables["PM25"][
-            :, 0, lat_idx, lon_idx
-        ]  # Assuming that the 'LAY' dimension is size 1
+        pm25 = self.forecast.variables["PM25"][:, 0, lat_idx, lon_idx]
 
-        # Find the maximum and minimum levels
-        max_pm25 = float(pm25.max())
-        min_pm25 = float(pm25.min())
+        pm25_timeseries = self.forecast.variables["PM25"][:, 0, lat_idx, lon_idx]
 
-        # Extract the PM2.5 data for this cell across all time steps
-        pm25_timeseries = self.forecast.variables["PM25"][
-            :, 0, lat_idx, lon_idx
-        ]  # Assuming that the 'LAY' dimension is size 1
-
-        # Extract the time flags
-        tflags = self.forecast.variables["TFLAG"][
-            :, 0
-        ]  # Assuming that the 'LAY' dimension is size 1
+        tflags = self.forecast.variables["TFLAG"][:, 0]
 
         # Convert the time flags to dates and times
         dates = tflags[:, 0]
@@ -208,8 +203,24 @@ class Forecast:
             date + " " + time for date, time in zip(date_strings, time_strings)
         ]
 
-        # Convert the PM2.5 data to a list of Python floats
-        pm25_list = pm25_timeseries.tolist()
+        # Initialize the min, max, and their times
+        min_pm25 = float("inf")
+        max_pm25 = float("-inf")
+        min_pm25_time = None
+        max_pm25_time = None
+
+        # Convert the PM2.5 data to a list of Python floats and find min, max and their times
+        pm25_list = []
+        for dt_str, value in zip(datetime_strings, pm25_timeseries):
+            value = float(value)
+            pm25_list.append(value)
+
+            if value < min_pm25:
+                min_pm25 = value
+                min_pm25_time = dt_str
+            if value > max_pm25:
+                max_pm25 = value
+                max_pm25_time = dt_str
 
         # Combine the datetime strings and PM2.5 levels into a list of tuples
         timeseries = list(zip(datetime_strings, pm25_list))
@@ -217,7 +228,16 @@ class Forecast:
         # Calculate the worst projected AQI
         aqi = self.calculate_aqi(max_pm25)
 
-        return timeseries, max_pm25, min_pm25, aqi
+        return {
+            "data": timeseries,
+            "meta": {
+                "max_pm25": {"value": max_pm25, "datetime": max_pm25_time},
+                "min_pm25": {"value": min_pm25, "datetime": min_pm25_time},
+                "aqi": aqi,
+                "latitude": lat,
+                "longitude": lon,
+            },
+        }
 
     @staticmethod
     def calculate_aqi(pm25):

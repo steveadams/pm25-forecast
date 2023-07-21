@@ -1,4 +1,4 @@
-import Map, {
+import ReactMapGL, {
   FullscreenControl,
   GeolocateControl,
   Layer,
@@ -19,7 +19,7 @@ interface SearchMapProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'token-is-missing';
 
-const SearchMap: FC<SearchMapProps> = ({ className, coords, setCoords }) => {
+const Map: FC<SearchMapProps> = ({ coords, setCoords }) => {
   const mapRef = useRef<MapRef>(null);
 
   const setAndFlyTo = useCallback(
@@ -44,59 +44,53 @@ const SearchMap: FC<SearchMapProps> = ({ className, coords, setCoords }) => {
   };
 
   return (
-    <div
-      className={`mx-auto my-6 w-full max-w-3xl h-96 overflow-hidden rounded-lg ${className}`}
+    <ReactMapGL
+      id="map"
+      ref={mapRef}
+      initialViewState={initialViewState}
+      mapStyle="mapbox://styles/mapbox/streets-v9"
+      mapboxAccessToken={TOKEN}
+      onClick={(e) => {
+        const { lat, lng } = e.lngLat;
+        setCoords({ latitude: lat, longitude: lng });
+      }}
     >
-      <Map
-        id="map"
-        ref={mapRef}
-        initialViewState={initialViewState}
-        mapStyle="mapbox://styles/mapbox/streets-v9"
+      <GeocoderControl
         mapboxAccessToken={TOKEN}
-        onClick={(e) => {
-          const { lat, lng } = e.lngLat;
-          setCoords({ latitude: lat, longitude: lng });
+        position="top-right"
+        onResult={(e) => {
+          setAndFlyTo({
+            latitude: (e as any).result.center[1],
+            longitude: (e as any).result.center[0],
+          });
         }}
+      />
+
+      <GeolocateControl
+        onGeolocate={({ coords }) => {
+          setAndFlyTo({
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          });
+        }}
+        showUserLocation={false}
+        position="top-left"
+      />
+      <FullscreenControl position="top-left" />
+      <NavigationControl position="top-left" />
+
+      <Marker key={`marker`} {...coords} anchor="bottom">
+        <Pin />
+      </Marker>
+
+      <Source
+        id="fire_perimeters"
+        type="geojson"
+        data={import.meta.env.VITE_API_BASE_URL + '/fire_perimeters'}
       >
-        <Marker key={`marker`} {...coords} anchor="bottom">
-          <Pin />
-        </Marker>
-
-        <Source
-          id="fire_perimeters"
-          type="geojson"
-          data={import.meta.env.VITE_API_BASE_URL + '/fire_perimeters'}
-        >
-          <Layer {...outlineLayer} />
-          <Layer {...fillLayer} />
-        </Source>
-
-        <GeolocateControl
-          onGeolocate={({ coords }) => {
-            setAndFlyTo({
-              latitude: coords.latitude,
-              longitude: coords.longitude,
-            });
-          }}
-          showUserLocation={false}
-          position="top-left"
-        />
-
-        <FullscreenControl position="top-left" />
-        <NavigationControl position="top-left" />
-
-        <GeocoderControl
-          mapboxAccessToken={TOKEN}
-          position="top-right"
-          onResult={(e) => {
-            setAndFlyTo({
-              latitude: (e as any).result.center[1],
-              longitude: (e as any).result.center[0],
-            });
-          }}
-        />
-      </Map>
-    </div>
+        <Layer {...fillLayer} />
+      </Source>
+    </ReactMapGL>
   );
 };
 
@@ -117,7 +111,7 @@ function Pin({ size = 20 }) {
   );
 }
 
-export { SearchMap };
+export { Map as SearchMap };
 
 const fillLayer: LayerProps = {
   id: 'fire_perimeters_fill',
@@ -126,21 +120,7 @@ const fillLayer: LayerProps = {
   layout: {},
   paint: {
     'fill-color': '#f97316',
-    'fill-opacity': 0.5,
+    'fill-opacity': 0.65,
   },
   filter: ['==', '$type', 'Polygon'],
-  // minzoom: 7,
-};
-
-const outlineLayer: LayerProps = {
-  id: 'fire_perimeters_outline',
-  type: 'line',
-  source: 'fire_perimeters',
-  layout: {},
-  paint: {
-    'line-color': '#ea580c',
-    'line-width': 2,
-  },
-  filter: ['==', '$type', 'Polygon'],
-  // minzoom: 7,
 };

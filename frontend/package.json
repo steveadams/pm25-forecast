@@ -11,9 +11,12 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.7.15",
+    "@heroicons/react": "^2.0.18",
     "@mapbox/mapbox-gl-geocoder": "^5.0.1",
     "@mapbox/search-js-react": "^1.0.0-beta.17",
     "chart.js": "^4.3.0",
+    "chartjs-adapter-dayjs-4": "^1.0.4",
+    "dayjs": "^1.11.9",
     "mapbox-gl": "^2.15.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",

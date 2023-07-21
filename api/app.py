@@ -50,14 +50,12 @@ def create_app(config_object=None):
     def get_forecast(lat, lon):
         lat = float(lat)
         lon = float(lon)
-        timeseries, max, min, aqi = current_app.config["FORECAST"].get_forecast(
-            lat, lon
-        )
+        forecast = current_app.config["FORECAST"].get_forecast(lat, lon)
 
-        if timeseries is None or max is None or min is None:
+        if forecast is None:
             return jsonify({"error": "Failed to get forecast"}), 404
 
-        return jsonify({"max": max, "min": min, "timeseries": timeseries, "aqi": aqi})
+        return jsonify(forecast)
 
     @app.route("/fire_perimeters", methods=["GET"])
     def get_fire_perimeters():

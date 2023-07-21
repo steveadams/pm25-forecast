@@ -7,12 +7,22 @@ type BoundsData = {
 };
 
 type Forecast = {
-  max: number;
-  min: number;
-  timeseries: [string, number][];
-  aqi: {
-    rating: number;
-    category: string;
+  data: [string, number][];
+  meta: {
+    aqi: {
+      rating: number;
+      category: string;
+    };
+    min_pm25: {
+      value: number;
+      datetime: string;
+    };
+    max_pm25: {
+      value: number;
+      datetime: string;
+    };
+    latitude: number;
+    longitude: number;
   };
 };
 
@@ -60,6 +70,8 @@ const useForecast = ({ latitude, longitude }: Coords) => {
   );
 
   const loading = !data && !error;
+
+  console.log(data);
 
   return {
     loading,
