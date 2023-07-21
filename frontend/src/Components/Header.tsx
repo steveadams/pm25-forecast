@@ -44,21 +44,21 @@ const Header = () => {
         <div className="hidden lg:flex lg:gap-x-12">
           <a
             href="#about"
-            className="text-sm font-semibold leading-6 text-gray-900"
+            className="text-sm font-semibold leading-6 text-gray-900 plausible-event-name=Read+About"
             onClick={() => setAboutOpen(true)}
           >
             About
           </a>
           <a
             href="#privacy"
-            className="text-sm font-semibold leading-6 text-gray-900"
+            className="text-sm font-semibold leading-6 text-gray-900 plausible-event-name=Read+Privacy"
             onClick={() => setPrivacyOpen(true)}
           >
             Privacy
           </a>
           <a
             href="#subscribe"
-            className="text-sm font-semibold leading-6 text-gray-900"
+            className="text-sm font-semibold leading-6 text-gray-900 plausible-event-name=Open+Subscribe+Modal"
             onClick={() => setSubscribeOpen(true)}
           >
             Subscribe

@@ -74,7 +74,7 @@ const SubscribeModal: FC<{
                     />
                     <button
                       type="submit"
-                      className="flex-none rounded-md bg-white px-3 py-2 font-bold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      className="flex-none rounded-md bg-white px-3 py-2 font-bold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white plausible-event-name=Subscribe"
                     >
                       Notify me
                     </button>
