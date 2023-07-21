@@ -9,7 +9,6 @@ domains:
   type: PRIMARY
   zone: smokebuddy.app
 
-
 services:
 - name: pm25-api
   routes:
