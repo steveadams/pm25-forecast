@@ -11,9 +11,9 @@ domains:
 
 services:
 - name: pm25-api
+  environment_slug: python
   routes:
   - path: /api
-  environment_slug: python
   # envs:
   # - key: MAILCHIMP_API_KEY
   #   scope: RUN_AND_BUILD_TIME
@@ -36,10 +36,10 @@ services:
 
 static_sites:
 - name: pm25-frontend
+  environment_slug: node-js
   routes:
   - path: /
   build_command: npm run build
-  environment_slug: node-js
   # envs:
   # - key: VITE_BASE_URL
   #   scope: BUILD_TIME
