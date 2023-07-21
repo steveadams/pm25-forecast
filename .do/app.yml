@@ -1,20 +1,19 @@
+name: pm25-forecast
+
+alerts:
+- rule: DEPLOYMENT_FAILED
+- rule: DOMAIN_FAILED
+
+domains:
+- domain: smokebuddy.app
+  type: PRIMARY
+  zone: smokebuddy.app
+
+
 services:
 - name: pm25-api
-- region: tor
-  alerts:
-  - rule: DEPLOYMENT_FAILED
-  - rule: DOMAIN_FAILED
-  domains:
-  - domain: smokebuddy.app
-    type: PRIMARY
-    zone: smokebuddy.app
-  ingress:
-    rules:
-    - component:
-        name: forecast-api
-      match:
-        path:
-          prefix: /api
+  routes:
+  - path: /api
   environment_slug: python
   # envs:
   # - key: MAILCHIMP_API_KEY
@@ -38,21 +37,8 @@ services:
 
 static_sites:
 - name: pm25-frontend
-- region: tor
-- alerts:
-  - rule: DEPLOYMENT_FAILED
-  - rule: DOMAIN_FAILED
-  domains:
-  - domain: smokebuddy.app
-    type: PRIMARY
-    zone: smokebuddy.app
-  ingress:
-    rules:
-    - component:
-        name: pm25-frontend
-      match:
-        path:
-          prefix: /
+  routes:
+  - path: /
   build_command: npm run build
   environment_slug: node-js
   # envs:
