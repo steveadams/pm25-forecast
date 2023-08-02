@@ -8,7 +8,7 @@ const Subscribe = () => (
     />
 
     {/* Dim the background image to make the text more readable */}
-    <div className="absolute inset-0 bg-gray-900/70" />
+    <div className="absolute inset-0 bg-black/70" />
 
     {/* Content here */}
     <div className="relative mx-auto w-full lg:mx-0">

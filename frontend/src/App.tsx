@@ -1,6 +1,5 @@
 import { Stats } from './Components/Stats';
 import { Header } from './Components/Header';
-// import { Subscribe } from './Components/Subscribe';
 import { SearchMap } from './Components/Map';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useForecast } from './api';
@@ -28,7 +27,7 @@ function App() {
   const { forecast, loading } = useForecast(coords);
 
   return (
-    <main className="container mx-auto max-w-7xl">
+    <main className="container mx-auto max-w-7xl text-gray-900 dark:text-gray-50">
       <Header />
       <div className="p-0 lg:px-2">
         <div

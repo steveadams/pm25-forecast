@@ -25,7 +25,7 @@ const AboutModal: FC<{
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -39,28 +39,28 @@ const AboutModal: FC<{
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
                 <div className="flex">
                   <QuestionMarkCircleIcon
-                    className="h-12 w-12 text-green-600 bg-green-100 rounded-full p-2"
+                    className="h-12 w-12 text-green-600 bg-green-300/25 rounded-full p-2"
                     aria-hidden="true"
                   />
                   <div className="ml-4">
                     <Dialog.Title
                       as="h3"
-                      className="text-lg font-black leading-6 text-gray-900"
+                      className="text-lg font-black leading-6"
                     >
                       What's SmokeBuddy?
                     </Dialog.Title>
                     <div className="mt-2">
-                      <p className="text-sm text-gray-500 font-semibold">
+                      <p className="text-sm font-semibold">
                         Here's what we're up to, and why.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="my-6 px-4 text-sm text-gray-700 flex flex-col gap-y-3">
+                <div className="my-6 px-4 text-sm flex flex-col gap-y-3 text-gray-700 dark:text-gray-200">
                   <p>
                     Meet SmokeBuddy, your friendly neighborhood guide to
                     Canada's wildfire data. We know, it's not the easiest thing

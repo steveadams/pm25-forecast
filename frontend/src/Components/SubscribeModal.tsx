@@ -24,7 +24,7 @@ const SubscribeModal: FC<{
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -38,7 +38,7 @@ const SubscribeModal: FC<{
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 py-12 text-left shadow-xl transition-all w-full max-w-3xl md:px-12 md:py-16 mx-4">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 py-12 text-left shadow-xl transition-all w-full max-w-3xl md:px-12 md:py-16 mx-4">
                 {/* Add a background image */}
                 <img
                   className="absolute inset-0 h-full w-full object-cover"
